@@ -1,0 +1,19 @@
+.calendar {
+  &\:month-active::after {
+    position: absolute;
+    background: white;
+    content: '';
+    display: block;
+    height: 2rem;
+    width: .5rem;
+    transform: translateY(-50%);
+    top: 50%;
+    right: -.8rem;
+    border-top-left-radius: 50%;
+    border-bottom-left-radius: 50%;
+  }
+
+  &\:year-input:focus {
+    outline: none;
+  }
+}

@@ -1,0 +1,5 @@
+.schedule {
+  &\:event {
+    border-left: 4px solid config('colors.primary');
+  }
+}

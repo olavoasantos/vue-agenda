@@ -1,0 +1,13 @@
+@import '~font-awesome/scss/font-awesome';
+
+@tailwind preflight;
+
+@tailwind utilities;
+
+@import './base';
+@import './calendar';
+@import './schedule';
+
+.flex-center {
+  @apply flex justify-center items-center;
+}

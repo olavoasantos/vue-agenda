@@ -1,0 +1,39 @@
+html, body {
+  @apply bg-primary-lightest
+         w-screen
+         h-screen
+         flex
+         m-0
+         p-0
+         items-center
+         justify-center;
+}
+
+a {
+  & {
+    @apply no-underline text-black;
+  }
+  &:hover {
+    @apply text-blue;
+  }
+}
+
+input:focus {
+  outline: none;
+  @apply .border-primary-lighter;
+}
+
+.left-px {
+  left: 1px;
+}
+
+.right-0 {
+  right: 0;
+}
+.top-0 {
+  top: 0;
+}
+
+.overflow-x-hidden {
+  overflow-x: hidden;
+}
