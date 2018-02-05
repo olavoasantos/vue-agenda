@@ -5,10 +5,10 @@ export default {
     month: null,
     pickerIsVisible: false,
     selected: {
-      year: 2018,
-      month: 1,
-      day: 3,
-      code: 201813,
+      year: null,
+      month: null,
+      day: null,
+      code: null
     },
     months: [
       { short: 'jan', long: 'January' },
@@ -70,6 +70,14 @@ export default {
     day(state, day) {
       state.day = day;
     },
+    deselect(state) {
+      state.selected = {
+        year: null,
+        month: null,
+        day: null,
+        code: null
+      };
+    },
   },
   actions: {
     init({commit}) {
@@ -80,6 +88,9 @@ export default {
     },
     selectYear({commit}, year) {
       commit('year', year);
+    },
+    deselect({commit}) {
+      commit('deselect');
     },
     goTo({commit}, options) {
       commit('goTo', options);

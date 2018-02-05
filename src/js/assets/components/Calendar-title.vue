@@ -2,14 +2,14 @@
   <div class="flex items-start">
 
     <!-- Título -->
-    <h3 class="text-primary text-3xl flex-1 flex items-end">
+    <h3 class="text-primary text-3xl flex-1 flex items-center">
       <span>{{ $trans(month) }},</span>
       <small class="text-grey ml-4"> {{ year }}</small>
     </h3>
 
     <!-- Link para ir ao dia de hoje -->
     <span @click="$store.commit('calendar/today')"
-          class="p-2 border-2 cursor-pointer hover:border-primary-light border-grey rounded"
+          class="p-2 cursor-pointer hover:border-primary-light border-2 border-grey rounded font-bold text-grey-darker"
     >{{ $trans('today') }}</span>
 
   </div>

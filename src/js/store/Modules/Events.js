@@ -8,51 +8,55 @@ export default {
   },
 
   mutations: {
-    store(state, event) {
-      if(!state.list[event.dayCode]) state.list[event.dayCode] = [];
-      state.list[event.dayCode].push(event);
-
-      Storage.save('events', state.list);
-    },
-    save(state, event) {
-      state.list[event.dayCode] = state.list[event.dayCode].map(item => {
-        return (item.id === event.id) ? event : item;
-      });
-
-      Storage.save('events', state.list);
-    },
-    remove(state, event) {
-      state.list[event.dayCode] = state.list[event.dayCode].filter(item => {
-        return (item.id !== event.id);
-      });
-
-      Storage.save('events', state.list);
+    save(state, list) {
+      state.list = list;
     }
   },
 
   actions: {
 
-    store({ commit }, event) {
-      commit('store', event);
+    store({ dispatch, commit, state }, event) {
+      let list = Object.assign({}, state.list);
+      if(!list[event.dayCode]) list[event.dayCode] = [];
+      list[event.dayCode].push(event);
+
+      commit('save', list);
+      dispatch('persist', list);
     },
 
-    destroy({ commit }, event) {
-      commit('remove', event);
+    update({ dispatch, commit, state }, event) {
+      let list = Object.assign({}, state.list);
+      list[event.dayCode] = list[event.dayCode].map(item => {
+        return (item.id === event.id) ? event : item;
+      });
+      
+      commit('save', list);
+      dispatch('persist', list);
     },
 
-    update({ commit }, event) {
-      commit('save', event);
-    },
-
-    markComplete({ commit }, event) {
+    markComplete({ dispatch }, event) {
       event.isComplete = true;
-      commit('save', event);
+      dispatch('update', event);
     },
 
-    markIncomplete({ commit }, event) {
+    markIncomplete({ dispatch }, event) {
       event.isComplete = false;
-      commit('save', event);
+      dispatch('update', event);
     },
+
+    destroy({ dispatch, commit, state }, event) {
+      let list = Object.assign({}, state.list);
+      list[event.dayCode] = list[event.dayCode].filter(item => {
+        return (item.id !== event.id);
+      });
+
+      commit('save', list);
+      dispatch('persist', list);
+    },
+
+    persist(context, list) {
+      Storage.save('events', list);
+    }
     
   }
 };

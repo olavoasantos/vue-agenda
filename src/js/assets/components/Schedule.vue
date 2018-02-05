@@ -13,7 +13,7 @@
 
     <div class="schedule:events-head flex-center p-4" v-show="!formIsVisible">
       <h3 class="schedule:events-title flex-1">{{ $trans('Here\'s your schedule') }}:</h3>
-      <div class="schedule:add-button flex-center rounded border p-2 cursor-pointer hover:border-primary text-grey-darker" @click="showForm"
+      <div class="schedule:add-button flex-center rounded border-2 border-grey p-2 cursor-pointer hover:border-primary font-bold text-grey-darker" @click="showForm"
            v-html="$trans('<i class=\'mr-2 fa fa-plus\'></i> event')"
       >
       </div>
@@ -55,12 +55,15 @@
         return this.$store.state.schedule.isVisible;
       },
       day() {
+        if(!this.$store.state.calendar.selected.day) return '';
         return this.$store.state.calendar.selected.day;
       },
       year() {
+        if(!this.$store.state.calendar.selected.year) return '';
         return this.$store.state.calendar.selected.year;
       },
       month() {
+        if(!this.$store.state.calendar.selected.month) return '';
         let monthCode = this.$store.state.calendar.selected.month;
 
         return this.$store.state.calendar.months[monthCode].long;
