@@ -37962,10 +37962,10 @@ var StorageDriverInterface = function () {
     month: null,
     pickerIsVisible: false,
     selected: {
-      year: 2018,
-      month: 1,
-      day: 3,
-      code: 201813
+      year: null,
+      month: null,
+      day: null,
+      code: null
     },
     months: [{ short: 'jan', long: 'January' }, { short: 'feb', long: 'February' }, { short: 'mar', long: 'March' }, { short: 'apr', long: 'April' }, { short: 'may', long: 'May' }, { short: 'jun', long: 'June' }, { short: 'jul', long: 'July' }, { short: 'aug', long: 'August' }, { short: 'sep', long: 'September' }, { short: 'oct', long: 'October' }, { short: 'nov', long: 'November' }, { short: 'dec', long: 'December' }],
     weekdays: [{ short: 'Sun', long: 'Sunday' }, { short: 'Mon', long: 'Monday' }, { short: 'Tue', long: 'Tuesday' }, { short: 'Wed', long: 'Wednesday' }, { short: 'Thu', long: 'Thursday' }, { short: 'Fri', long: 'Friday' }, { short: 'Sat', long: 'Saturday' }]
@@ -38005,6 +38005,14 @@ var StorageDriverInterface = function () {
     },
     day: function day(state, _day) {
       state.day = _day;
+    },
+    deselect: function deselect(state) {
+      state.selected = {
+        year: null,
+        month: null,
+        day: null,
+        code: null
+      };
     }
   },
   actions: {
@@ -38023,19 +38031,24 @@ var StorageDriverInterface = function () {
 
       commit('year', year);
     },
-    goTo: function goTo(_ref4, options) {
+    deselect: function deselect(_ref4) {
       var commit = _ref4.commit;
+
+      commit('deselect');
+    },
+    goTo: function goTo(_ref5, options) {
+      var commit = _ref5.commit;
 
       commit('goTo', options);
     },
-    togglePicker: function togglePicker(_ref5) {
-      var state = _ref5.state;
+    togglePicker: function togglePicker(_ref6) {
+      var state = _ref6.state;
 
       state.pickerIsVisible = !state.pickerIsVisible;
     },
-    selectDate: function selectDate(_ref6, date) {
-      var dispatch = _ref6.dispatch,
-          commit = _ref6.commit;
+    selectDate: function selectDate(_ref7, date) {
+      var dispatch = _ref7.dispatch,
+          commit = _ref7.commit;
 
       commit('selectDate', date);
       dispatch('schedule/open', null, { root: true });
@@ -38068,9 +38081,11 @@ var StorageDriverInterface = function () {
       commit('open');
     },
     close: function close(_ref2) {
-      var commit = _ref2.commit;
+      var dispatch = _ref2.dispatch,
+          commit = _ref2.commit;
 
       commit('close');
+      dispatch('calendar/deselect', null, { root: true });
     }
   }
 });
@@ -38091,55 +38106,64 @@ var StorageDriverInterface = function () {
   },
 
   mutations: {
-    store: function store(state, event) {
-      if (!state.list[event.dayCode]) state.list[event.dayCode] = [];
-      state.list[event.dayCode].push(event);
-
-      __WEBPACK_IMPORTED_MODULE_0__config__["a" /* Storage */].save('events', state.list);
-    },
-    save: function save(state, event) {
-      state.list[event.dayCode] = state.list[event.dayCode].map(function (item) {
-        return item.id === event.id ? event : item;
-      });
-
-      __WEBPACK_IMPORTED_MODULE_0__config__["a" /* Storage */].save('events', state.list);
-    },
-    remove: function remove(state, event) {
-      state.list[event.dayCode] = state.list[event.dayCode].filter(function (item) {
-        return item.id !== event.id;
-      });
-
-      __WEBPACK_IMPORTED_MODULE_0__config__["a" /* Storage */].save('events', state.list);
+    save: function save(state, list) {
+      state.list = list;
     }
   },
 
   actions: {
     store: function store(_ref, event) {
-      var commit = _ref.commit;
+      var dispatch = _ref.dispatch,
+          commit = _ref.commit,
+          state = _ref.state;
 
-      commit('store', event);
-    },
-    destroy: function destroy(_ref2, event) {
-      var commit = _ref2.commit;
+      var list = Object.assign({}, state.list);
+      if (!list[event.dayCode]) list[event.dayCode] = [];
+      list[event.dayCode].push(event);
 
-      commit('remove', event);
+      commit('save', list);
+      dispatch('persist', list);
     },
-    update: function update(_ref3, event) {
-      var commit = _ref3.commit;
+    update: function update(_ref2, event) {
+      var dispatch = _ref2.dispatch,
+          commit = _ref2.commit,
+          state = _ref2.state;
 
-      commit('save', event);
+      var list = Object.assign({}, state.list);
+      list[event.dayCode] = list[event.dayCode].map(function (item) {
+        return item.id === event.id ? event : item;
+      });
+
+      commit('save', list);
+      dispatch('persist', list);
     },
-    markComplete: function markComplete(_ref4, event) {
-      var commit = _ref4.commit;
+    markComplete: function markComplete(_ref3, event) {
+      var dispatch = _ref3.dispatch;
 
       event.isComplete = true;
-      commit('save', event);
+      dispatch('update', event);
     },
-    markIncomplete: function markIncomplete(_ref5, event) {
-      var commit = _ref5.commit;
+    markIncomplete: function markIncomplete(_ref4, event) {
+      var dispatch = _ref4.dispatch;
 
       event.isComplete = false;
-      commit('save', event);
+      dispatch('update', event);
+    },
+    destroy: function destroy(_ref5, event) {
+      var dispatch = _ref5.dispatch,
+          commit = _ref5.commit,
+          state = _ref5.state;
+
+      var list = Object.assign({}, state.list);
+      list[event.dayCode] = list[event.dayCode].filter(function (item) {
+        return item.id !== event.id;
+      });
+
+      commit('save', list);
+      dispatch('persist', list);
+    },
+    persist: function persist(context, list) {
+      __WEBPACK_IMPORTED_MODULE_0__config__["a" /* Storage */].save('events', list);
     }
   }
 });
@@ -38557,19 +38581,23 @@ var render = function() {
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
   return _c("div", { staticClass: "flex items-start" }, [
-    _c("h3", { staticClass: "text-primary text-3xl flex-1 flex items-end" }, [
-      _c("span", [_vm._v(_vm._s(_vm.$trans(_vm.month)) + ",")]),
-      _vm._v(" "),
-      _c("small", { staticClass: "text-grey ml-4" }, [
-        _vm._v(" " + _vm._s(_vm.year))
-      ])
-    ]),
+    _c(
+      "h3",
+      { staticClass: "text-primary text-3xl flex-1 flex items-center" },
+      [
+        _c("span", [_vm._v(_vm._s(_vm.$trans(_vm.month)) + ",")]),
+        _vm._v(" "),
+        _c("small", { staticClass: "text-grey ml-4" }, [
+          _vm._v(" " + _vm._s(_vm.year))
+        ])
+      ]
+    ),
     _vm._v(" "),
     _c(
       "span",
       {
         staticClass:
-          "p-2 border-2 cursor-pointer hover:border-primary-light border-grey rounded",
+          "p-2 cursor-pointer hover:border-primary-light border-2 border-grey rounded font-bold text-grey-darker",
         on: {
           click: function($event) {
             _vm.$store.commit("calendar/today")
@@ -38838,6 +38866,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: {
@@ -38847,6 +38876,11 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
   computed: {
     isToday: function isToday() {
       return this.day.code === this.$store.getters['calendar/todayCode'];
+    },
+    isActive: function isActive() {
+      var selected = this.$store.state.calendar.selected.code;
+
+      return selected ? this.day.code === selected : false;
     }
   },
 
@@ -38884,7 +38918,9 @@ var render = function() {
           staticClass: "h-full py-4 px-2",
           class: {
             "text-grey": !_vm.day.currentMonth,
-            "text-primary-light hover:bg-primary-lightest": _vm.day.currentMonth
+            "text-primary-light hover:bg-primary-lightest":
+              !_vm.isActive && _vm.day.currentMonth,
+            "text-white bg-primary-lighter": _vm.isActive
           },
           on: {
             click: function($event) {
@@ -39559,12 +39595,15 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       return this.$store.state.schedule.isVisible;
     },
     day: function day() {
+      if (!this.$store.state.calendar.selected.day) return '';
       return this.$store.state.calendar.selected.day;
     },
     year: function year() {
+      if (!this.$store.state.calendar.selected.year) return '';
       return this.$store.state.calendar.selected.year;
     },
     month: function month() {
+      if (!this.$store.state.calendar.selected.month) return '';
       var monthCode = this.$store.state.calendar.selected.month;
 
       return this.$store.state.calendar.months[monthCode].long;
@@ -40217,7 +40256,7 @@ var render = function() {
           _vm._v(" "),
           _c("div", {
             staticClass:
-              "schedule:add-button flex-center rounded border p-2 cursor-pointer hover:border-primary text-grey-darker",
+              "schedule:add-button flex-center rounded border-2 border-grey p-2 cursor-pointer hover:border-primary font-bold text-grey-darker",
             domProps: {
               innerHTML: _vm._s(
                 _vm.$trans("<i class='mr-2 fa fa-plus'></i> event")

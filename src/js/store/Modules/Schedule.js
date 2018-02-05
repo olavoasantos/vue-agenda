@@ -15,8 +15,9 @@ export default {
     open({ commit }) {
       commit('open');
     },
-    close({ commit }) {
+    close({ dispatch, commit }) {
       commit('close');
+      dispatch('calendar/deselect', null, { root: true });
     }
   }
 };

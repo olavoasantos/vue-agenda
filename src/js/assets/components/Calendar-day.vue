@@ -3,7 +3,8 @@
     <div class="h-full py-4 px-2"
           :class="{
             'text-grey': !day.currentMonth,
-            'text-primary-light hover:bg-primary-lightest': day.currentMonth
+            'text-primary-light hover:bg-primary-lightest': !isActive && day.currentMonth,
+            'text-white bg-primary-lighter': isActive
           }"
           @click="select(day.year, day.month, day.number, day.code)"
     >
@@ -21,7 +22,12 @@
     computed: {
       isToday() {
         return this.day.code === this.$store.getters['calendar/todayCode'];
-      }
+      },
+      isActive() {
+        let selected = this.$store.state.calendar.selected.code;
+
+        return selected ? this.day.code === selected : false;
+      },
     },
 
     methods: {
